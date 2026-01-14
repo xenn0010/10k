@@ -1,0 +1,10 @@
+# Core dependencies
+langchain-core>=0.1.0
+pydantic>=2.0.0
+
+# LangGraph integration (optional)
+langgraph>=0.0.1
+langchain-openai>=0.0.1
+
+# PDF rendering (optional)
+playwright>=1.40.0
