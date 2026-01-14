@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dynamic-template-engine"
+version = "1.0.0"
+description = "LangGraph plugin for generating pixel-perfect documents with content-aware text fitting"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "pydantic>=2.0.0",
+]
+
+[project.optional-dependencies]
+langgraph = [
+    "langchain-core>=0.1.0",
+    "langgraph>=0.0.1",
+    "langchain-openai>=0.0.1",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
