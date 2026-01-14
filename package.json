@@ -1,0 +1,48 @@
+{
+  "name": "dynamic-template-engine",
+  "version": "1.0.0",
+  "description": "A dynamic template engine for CRE professionals - generates pixel-perfect documents with content-aware text fitting",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "demo": "tsx examples/demo.ts",
+    "test": "tsx --test src/**/*.test.ts",
+    "clean": "rm -rf dist output",
+    "prepublish": "npm run build"
+  },
+  "keywords": [
+    "template",
+    "pdf",
+    "dynamic",
+    "commercial-real-estate",
+    "cre",
+    "document-generation",
+    "text-fitting",
+    "offering-memorandum"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "@types/node": "^25.0.8",
+    "pdf-lib": "^1.17.1",
+    "pdf-parse": "^2.4.5",
+    "puppeteer-core": "^24.35.0",
+    "sharp": "^0.34.5",
+    "svgo": "^4.0.0",
+    "typescript": "^5.9.3"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ]
+}
