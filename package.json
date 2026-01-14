@@ -6,10 +6,14 @@
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
+  "bin": {
+    "dte-mcp": "./dist/src/mcp/server.js"
+  },
   "scripts": {
     "build": "tsc",
     "dev": "tsx watch src/index.ts",
     "demo": "tsx examples/demo.ts",
+    "mcp": "tsx src/mcp/server.ts",
     "test": "tsx --test src/**/*.test.ts",
     "clean": "rm -rf dist output",
     "prepublish": "npm run build"
@@ -30,6 +34,7 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.25.2",
     "@types/node": "^25.0.8",
     "pdf-lib": "^1.17.1",
     "pdf-parse": "^2.4.5",

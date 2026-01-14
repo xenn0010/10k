@@ -43,7 +43,7 @@ export interface TextFitResult {
 
 export class ContentInjector {
   private options: InjectionOptions;
-  private formatters: Map<string, (value: any) => string>;
+  private formatters: Map<string, (value: any, ...args: any[]) => string>;
 
   constructor(options: InjectionOptions = {}) {
     this.options = {
@@ -53,17 +53,16 @@ export class ContentInjector {
     };
 
     // Initialize built-in formatters
-    this.formatters = new Map([
-      ['currency', formatCurrency],
-      ['number', (v) => formatNumber(v)],
-      ['percent', formatPercentage],
-      ['sqft', formatSqFt],
-      ['uppercase', (v) => String(v).toUpperCase()],
-      ['lowercase', (v) => String(v).toLowerCase()],
-      ['capitalize', (v) => String(v).charAt(0).toUpperCase() + String(v).slice(1)],
-      ['date', (v) => new Date(v).toLocaleDateString()],
-      ['shortDate', (v) => new Date(v).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })],
-    ]);
+    this.formatters = new Map<string, (value: any, ...args: any[]) => string>();
+    this.formatters.set('currency', (v) => formatCurrency(v));
+    this.formatters.set('number', (v) => formatNumber(v));
+    this.formatters.set('percent', (v) => formatPercentage(v));
+    this.formatters.set('sqft', (v) => formatSqFt(v));
+    this.formatters.set('uppercase', (v) => String(v).toUpperCase());
+    this.formatters.set('lowercase', (v) => String(v).toLowerCase());
+    this.formatters.set('capitalize', (v) => String(v).charAt(0).toUpperCase() + String(v).slice(1));
+    this.formatters.set('date', (v) => new Date(v).toLocaleDateString());
+    this.formatters.set('shortDate', (v) => new Date(v).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }));
 
     // Add custom formatters
     if (options.formatters) {
@@ -250,12 +249,14 @@ export class ContentInjector {
     let formatted = String(value ?? '');
 
     for (const formatterExpr of formatterParts) {
-      const [formatterName, ...args] = formatterExpr.trim().split(':');
-      const formatter = this.formatters.get(formatterName);
+      const parts = formatterExpr.trim().split(':');
+      const formatterName = parts[0];
+      const formatterArgs = parts.slice(1);
+      const formatter = this.formatters.get(formatterName || '');
 
       if (formatter) {
         try {
-          formatted = formatter(value, ...args);
+          formatted = formatter(value, ...formatterArgs);
         } catch (e) {
           console.warn(`Formatter error: ${formatterName}`, e);
         }

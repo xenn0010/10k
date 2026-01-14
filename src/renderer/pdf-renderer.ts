@@ -5,17 +5,19 @@
  * Uses Puppeteer for accurate rendering.
  */
 
-import puppeteer, { Browser, Page, PDFOptions } from 'puppeteer-core';
-import { RenderOptions, RenderResult, Template } from '../types/index.js';
+import puppeteer, { Browser, PDFOptions } from 'puppeteer-core';
+import { RenderResult, Template } from '../types/index.js';
 import { HTMLGenerator } from '../generator/html-generator.js';
 import { toPixels } from '../utils/helpers.js';
+import * as fs from 'fs';
 
-export interface PDFRenderOptions extends RenderOptions {
+export interface PDFRenderOptions {
   executablePath?: string; // Path to Chrome/Chromium
   printBackground?: boolean;
   displayHeaderFooter?: boolean;
   headerTemplate?: string;
   footerTemplate?: string;
+  scale?: number;
   margin?: {
     top?: string;
     right?: string;
@@ -28,9 +30,8 @@ export class PDFRenderer {
   private browser: Browser | null = null;
   private options: PDFRenderOptions;
 
-  constructor(options: PDFRenderOptions = { format: 'pdf' }) {
+  constructor(options: PDFRenderOptions = {}) {
     this.options = {
-      format: 'pdf',
       scale: 1,
       printBackground: true,
       ...options,
@@ -67,12 +68,12 @@ export class PDFRenderer {
       '/usr/bin/chromium-browser',
       '/usr/bin/chromium',
       '/snap/bin/chromium',
-      process.env.CHROME_PATH,
+      process.env['CHROME_PATH'],
     ].filter(Boolean) as string[];
 
     for (const loc of locations) {
       try {
-        require('fs').accessSync(loc);
+        fs.accessSync(loc);
         return loc;
       } catch {
         continue;
@@ -116,11 +117,12 @@ export class PDFRenderer {
         timeout: 30000,
       });
 
-      // Wait for fonts and text fitting
+      // Wait for fonts and text fitting - run in browser context
       await page.evaluate(() => {
         return new Promise<void>((resolve) => {
-          if ((window as any).DTE) {
-            (window as any).DTE.fitAllText();
+          const win = globalThis as typeof globalThis & { DTE?: { fitAllText: () => void } };
+          if (win.DTE) {
+            win.DTE.fitAllText();
           }
           setTimeout(resolve, 100);
         });
@@ -171,7 +173,7 @@ export class PDFRenderer {
 
       return {
         success: true,
-        output: pdfBuffer,
+        output: Buffer.from(pdfBuffer),
         metadata: {
           pageCount: template.pages.length,
           renderTime: Date.now() - startTime,
@@ -205,26 +207,27 @@ export class PDFRenderer {
       timeout: 30000,
     });
 
-    // Wait for any dynamic content
+    // Wait for any dynamic content - run in browser context
     await page.evaluate(() => {
       return new Promise<void>((resolve) => {
-        if ((window as any).DTE) {
-          (window as any).DTE.fitAllText();
+        const win = globalThis as typeof globalThis & { DTE?: { fitAllText: () => void } };
+        if (win.DTE) {
+          win.DTE.fitAllText();
         }
         setTimeout(resolve, 100);
       });
     });
 
+    const mergedOptions = { ...this.options, ...options };
     const pdfOptions: PDFOptions = {
-      printBackground: options?.printBackground ?? this.options.printBackground,
+      printBackground: mergedOptions.printBackground,
       preferCSSPageSize: true,
-      ...options,
     };
 
     const pdfBuffer = await page.pdf(pdfOptions);
     await page.close();
 
-    return pdfBuffer;
+    return Buffer.from(pdfBuffer);
   }
 
   /**
@@ -254,11 +257,12 @@ export class PDFRenderer {
       waitUntil: ['load', 'networkidle0'],
     });
 
-    // Wait for text fitting
+    // Wait for text fitting - run in browser context
     await page.evaluate(() => {
       return new Promise<void>((resolve) => {
-        if ((window as any).DTE) {
-          (window as any).DTE.fitAllText();
+        const win = globalThis as typeof globalThis & { DTE?: { fitAllText: () => void } };
+        if (win.DTE) {
+          win.DTE.fitAllText();
         }
         setTimeout(resolve, 100);
       });
@@ -271,7 +275,7 @@ export class PDFRenderer {
 
     await page.close();
 
-    return screenshot as Buffer;
+    return Buffer.from(screenshot);
   }
 
   /**

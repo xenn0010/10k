@@ -314,7 +314,6 @@ async function main() {
               fontSize: 11,
               fontWeight: 500,
               color: '#718096',
-              textAlign: 'right',
             },
             constraints: {
               textAlign: 'right',
